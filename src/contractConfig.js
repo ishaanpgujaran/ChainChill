@@ -1,6 +1,5 @@
 export const CONTRACT_ADDRESS = "0xB5F2484a02A2Bfc2Cc4D38837F16d24c9D9F52ba";
 export const CONTRACT_ABI = [
-    [
         {
             "anonymous": false,
             "inputs": [
@@ -355,5 +354,4 @@ export const CONTRACT_ABI = [
             "stateMutability": "view",
             "type": "function"
         }
-    ]
 ];
