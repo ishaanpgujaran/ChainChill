@@ -1,20 +1,28 @@
 import { useState } from 'react'
 
 const HANDLER_ROLES = [
-  { value: 'manufacturer', label: '🏭 Manufacturer',          color: '#ede9fe', textColor: '#6d28d9' },
-  { value: 'warehouse',    label: '🏢 Warehouse / Storage',   color: '#dbeafe', textColor: '#1d4ed8' },
+  { value: 'manufacturer', label: '🏭 Manufacturer',            color: '#ede9fe', textColor: '#6d28d9' },
+  { value: 'warehouse',    label: '🏢 Warehouse / Storage',     color: '#dbeafe', textColor: '#1d4ed8' },
   { value: 'transporter',  label: '🚚 Transporter / Logistics', color: '#fef3c7', textColor: '#d97706' },
-  { value: 'receiver',     label: '📦 Receiver / Retailer',   color: '#dcfce7', textColor: '#15803d' },
+  { value: 'receiver',     label: '📦 Receiver / Retailer',     color: '#dcfce7', textColor: '#15803d' },
 ]
+
+// Matches the 4-type system from RegisterBatch
+const PRODUCT_TYPE_STYLES = {
+  pharma:        { icon: '💊', label: 'Pharma / Vaccines', bg: '#dbeafe', text: '#1d4ed8' },
+  frozen:        { icon: '🧊', label: 'Frozen Food',       bg: '#e0e7ff', text: '#4338ca' },
+  fresh:         { icon: '🥛', label: 'Fresh / Dairy',     bg: '#dcfce7', text: '#15803d' },
+  quickcommerce: { icon: '⚡', label: 'Quick Commerce',    bg: '#ffedd5', text: '#c2410c' },
+}
 
 export default function LogCheckpoint({ contract, account }) {
   const [form, setForm] = useState({
     batchId: '', handlerName: '', handlerRole: 'warehouse',
     temperature: '', location: ''
   })
-  const [status,   setStatus]  = useState('idle')
-  const [result,   setResult]  = useState(null)  // { txHash, isBreach }
-  const [errorMsg, setError]   = useState('')
+  const [status,    setStatus]   = useState('idle')
+  const [result,    setResult]   = useState(null)   // { txHash, isBreach, productType }
+  const [errorMsg,  setError]    = useState('')
 
   function set(field) { return e => setForm(f => ({ ...f, [field]: e.target.value })) }
 
@@ -54,7 +62,7 @@ export default function LogCheckpoint({ contract, account }) {
       )
       const receipt = await tx.wait()
 
-      setResult({ txHash: tx.hash, isBreach: willBreach, temp, minT, maxT })
+      setResult({ txHash: tx.hash, isBreach: willBreach, temp, minT, maxT, productType: batch.productType })
       setStatus('success')
     } catch (err) {
       console.error(err)
@@ -115,6 +123,16 @@ export default function LogCheckpoint({ contract, account }) {
             padding: '12px 20px', textAlign: 'left', marginBottom: 20,
             fontSize: '0.84rem'
           }}>
+            {/* Product type badge */}
+            {result.productType && (() => {
+              const pt = PRODUCT_TYPE_STYLES[result.productType] || { icon: '📦', label: result.productType, bg:'#f1f5f9', text:'#475569' }
+              return (
+                <div style={{ display:'flex', justifyContent:'space-between', padding:'4px 0', borderBottom:'1px solid var(--cc-border)', alignItems:'center' }}>
+                  <span style={{ color:'var(--cc-muted)', fontWeight:500 }}>Product Type</span>
+                  <span className="cc-badge" style={{ background: pt.bg, color: pt.text }}>{pt.icon} {pt.label}</span>
+                </div>
+              )
+            })()}
             {[
               ['Batch ID',     form.batchId],
               ['Handler',      form.handlerName],

@@ -2,15 +2,64 @@ import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 
 const PRODUCT_TYPES = [
-  { value: 'pharma',        label: '💊 Pharma / Vaccines' },
-  { value: 'food',          label: '🥛 Food & Dairy' },
-  { value: 'quickcommerce', label: '⚡ Quick Commerce' },
+  { value: 'pharma',        label: 'Pharma / Vaccines' },
+  { value: 'frozen',        label: 'Frozen Food' },
+  { value: 'fresh',         label: 'Fresh / Dairy' },
+  { value: 'quickcommerce', label: 'Quick Commerce' },
 ]
 
 const TEMP_PRESETS = {
-  pharma:        { min: '2',  max: '8',   hint: 'Standard vaccine range (2–8 °C)' },
-  food:          { min: '-2', max: '4',   hint: 'Fresh food & dairy (−2 to 4 °C)' },
-  quickcommerce: { min: '0',  max: '10',  hint: 'Quick commerce cold goods (0–10 °C)' },
+  pharma:        { min: '2',   max: '8'  },
+  frozen:        { min: '-18', max: '0'  },
+  fresh:         { min: '1',   max: '8'  },
+  quickcommerce: { min: '0',   max: '10' },
+}
+
+const PRODUCT_INFO = {
+  pharma: {
+    icon: '💊',
+    label: 'Pharma / Vaccines',
+    range: '2°C to 8°C',
+    description: 'Medicines, vaccines, injections, and biological samples.',
+    examples: ['Polio Vaccine', 'Insulin', 'Antibiotics', 'Blood Samples'],
+    borderColor: '#3b82f6',
+    bg: '#eff6ff',
+    badgeBg: '#dbeafe', badgeText: '#1d4ed8',
+    disclaimer: null,
+  },
+  frozen: {
+    icon: '🧊',
+    label: 'Frozen Food',
+    range: '−18°C to 0°C',
+    description: 'Frozen meals, ice cream, meat, seafood, and frozen vegetables.',
+    examples: ['Ice Cream', 'Frozen Chicken', 'Seafood', 'Ready Meals'],
+    borderColor: '#6366f1',
+    bg: '#eef2ff',
+    badgeBg: '#e0e7ff', badgeText: '#4338ca',
+    disclaimer: null,
+  },
+  fresh: {
+    icon: '🥛',
+    label: 'Fresh / Dairy',
+    range: '1°C to 8°C',
+    description: 'Milk, curd, fresh vegetables, fruits, eggs, and paneer.',
+    examples: ['Amul Milk', 'Curd', 'Fresh Vegetables', 'Eggs', 'Paneer'],
+    borderColor: '#22c55e',
+    bg: '#f0fdf4',
+    badgeBg: '#dcfce7', badgeText: '#15803d',
+    disclaimer: null,
+  },
+  quickcommerce: {
+    icon: '⚡',
+    label: 'Quick Commerce',
+    range: '0°C to 10°C',
+    description: 'Perishable goods for sub-30-minute delivery via Blinkit, Zepto, Swiggy Instamart.',
+    examples: ['Grocery Orders', 'Cold Beverages', 'Fresh Snacks', 'Packaged Dairy'],
+    borderColor: '#f97316',
+    bg: '#fff7ed',
+    badgeBg: '#ffedd5', badgeText: '#c2410c',
+    disclaimer: 'Quick Commerce is a delivery method — ensure product-specific temperature requirements are met by the handler.',
+  },
 }
 
 export default function RegisterBatch({ contract, account }) {
@@ -18,15 +67,15 @@ export default function RegisterBatch({ contract, account }) {
     batchId: '', productName: '', productType: 'pharma',
     minTemp: '2', maxTemp: '8', expiryDate: ''
   })
+  const info = PRODUCT_INFO[form.productType] || null
   const [status, setStatus]   = useState('idle')  // idle | loading | success | error
   const [txHash, setTxHash]   = useState('')
   const [errorMsg, setError]  = useState('')
 
-  const preset = TEMP_PRESETS[form.productType] || {}
-
   function handleTypeChange(e) {
     const t = e.target.value
-    setForm(f => ({ ...f, productType: t, ...TEMP_PRESETS[t] }))
+    const p = TEMP_PRESETS[t] || {}
+    setForm(f => ({ ...f, productType: t, minTemp: p.min ?? f.minTemp, maxTemp: p.max ?? f.maxTemp }))
   }
 
   function set(field) { return e => setForm(f => ({ ...f, [field]: e.target.value })) }
@@ -68,7 +117,7 @@ export default function RegisterBatch({ contract, account }) {
   }
 
   function reset() {
-    setForm({ batchId:'', productName:'', productType:'pharma', minTemp:'2', maxTemp:'8', expiryDate:'' })
+    setForm({ batchId:'', productName:'', productType:'pharma', minTemp: TEMP_PRESETS.pharma.min, maxTemp: TEMP_PRESETS.pharma.max, expiryDate:'' })
     setStatus('idle'); setTxHash(''); setError('')
   }
 
@@ -111,7 +160,7 @@ export default function RegisterBatch({ contract, account }) {
           }}>
             {[
               ['Product',  form.productName],
-              ['Type',     PRODUCT_TYPES.find(t => t.value === form.productType)?.label || form.productType],
+              ['Type',     (PRODUCT_INFO[form.productType]?.icon + ' ' + (PRODUCT_INFO[form.productType]?.label || form.productType))],
               ['Safe range', `${form.minTemp} °C to ${form.maxTemp} °C`],
               ['Expiry',   new Date(form.expiryDate).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })],
             ].map(([k, v]) => (
@@ -196,10 +245,55 @@ export default function RegisterBatch({ contract, account }) {
                 <option key={t.value} value={t.value}>{t.label}</option>
               ))}
             </select>
-            {preset.hint && (
-              <p style={{ fontSize:'0.75rem', color:'var(--cc-muted)', marginTop:5 }}>
-                💡 {preset.hint}
-              </p>
+
+            {/* Info card */}
+            {info && (
+              <div className="animate-fadeIn" style={{
+                marginTop: 12,
+                background: info.bg,
+                borderLeft: `4px solid ${info.borderColor}`,
+                borderRadius: '0 10px 10px 0',
+                border: `1px solid ${info.borderColor}30`,
+                borderLeft: `4px solid ${info.borderColor}`,
+                padding: '14px 16px',
+              }}>
+                {/* Header row */}
+                <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
+                  <span style={{ fontSize:'1.3rem' }}>{info.icon}</span>
+                  <div>
+                    <div style={{ fontWeight:700, fontSize:'0.88rem', color:'var(--cc-text)' }}>{info.label}</div>
+                    <div style={{ fontSize:'0.75rem', color:'var(--cc-muted)', marginTop:1 }}>Safe Range: <strong style={{ color:'var(--cc-text)' }}>{info.range}</strong></div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p style={{ fontSize:'0.78rem', color:'var(--cc-muted)', margin:'6px 0 8px' }}>{info.description}</p>
+
+                {/* Example chips */}
+                <div style={{ marginBottom: info.disclaimer ? 8 : 0 }}>
+                  <span style={{ fontSize:'0.7rem', fontWeight:600, color:'var(--cc-muted)', textTransform:'uppercase', letterSpacing:'.04em' }}>Examples: </span>
+                  <div style={{ display:'flex', flexWrap:'wrap', gap:5, marginTop:5 }}>
+                    {info.examples.map(ex => (
+                      <span key={ex} style={{
+                        background: info.badgeBg, color: info.badgeText,
+                        borderRadius: 99, padding: '2px 10px',
+                        fontSize: '0.74rem', fontWeight: 600,
+                      }}>{ex}</span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* QC disclaimer */}
+                {info.disclaimer && (
+                  <p style={{
+                    marginTop: 8, fontSize:'0.73rem', color: '#c2410c',
+                    background:'#ffedd5', borderRadius:6, padding:'6px 10px',
+                    fontStyle:'italic',
+                  }}>
+                    ⚠ {info.disclaimer}
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
