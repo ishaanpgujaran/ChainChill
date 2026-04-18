@@ -12,10 +12,10 @@ const SEPOLIA_CHAIN_ID = '0xaa36a7' // 11155111 in hex
 
 // ── Tab configuration ───────────────────────────────────
 const TABS = [
-  { id: 'dashboard', label: 'Dashboard',       icon: '◈',  needsWallet: false },
-  { id: 'register',  label: 'Register Batch',  icon: '⊞',  needsWallet: true  },
-  { id: 'log',       label: 'Log Checkpoint',  icon: '⊕',  needsWallet: true  },
-  { id: 'verify',    label: 'Verify Batch',    icon: '⊛',  needsWallet: false },
+  { id: 'dashboard', label: 'Dashboard', icon: '◈', needsWallet: false },
+  { id: 'register', label: 'Register Batch', icon: '⊞', needsWallet: true },
+  { id: 'log', label: 'Log Checkpoint', icon: '⊕', needsWallet: true },
+  { id: 'verify', label: 'Verify Batch', icon: '⊛', needsWallet: false },
 ]
 
 function shortAddress(addr) {
@@ -23,12 +23,12 @@ function shortAddress(addr) {
 }
 
 export default function App() {
-  const [account,      setAccount]      = useState(null)
-  const [contract,     setContract]     = useState(null)
-  const [provider,     setProvider]     = useState(null)
-  const [activeTab,    setActiveTab]    = useState('dashboard')
+  const [account, setAccount] = useState(null)
+  const [contract, setContract] = useState(null)
+  const [provider, setProvider] = useState(null)
+  const [activeTab, setActiveTab] = useState('dashboard')
   const [networkError, setNetworkError] = useState('')
-  const [connecting,   setConnecting]   = useState(false)
+  const [connecting, setConnecting] = useState(false)
 
   // ── Auto-reconnect if already authorised ───────────────
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function App() {
     window.ethereum
       .request({ method: 'eth_accounts' })
       .then(accs => { if (accs.length > 0) connectWallet() })
-      .catch(() => {})
+      .catch(() => { })
 
     // Listen for account / chain changes
     const onAccountsChanged = (accs) => {
@@ -46,10 +46,10 @@ export default function App() {
     const onChainChanged = () => window.location.reload()
 
     window.ethereum.on('accountsChanged', onAccountsChanged)
-    window.ethereum.on('chainChanged',    onChainChanged)
+    window.ethereum.on('chainChanged', onChainChanged)
     return () => {
       window.ethereum.removeListener('accountsChanged', onAccountsChanged)
-      window.ethereum.removeListener('chainChanged',    onChainChanged)
+      window.ethereum.removeListener('chainChanged', onChainChanged)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -61,7 +61,7 @@ export default function App() {
     setConnecting(true)
     try {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      const chainId  = await window.ethereum.request({ method: 'eth_chainId' })
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' })
 
       if (chainId !== SEPOLIA_CHAIN_ID) {
         setNetworkError('Switch MetaMask to Sepolia Testnet')
@@ -71,7 +71,7 @@ export default function App() {
       setNetworkError('')
 
       const _provider = new ethers.BrowserProvider(window.ethereum)
-      const _signer   = await _provider.getSigner()
+      const _signer = await _provider.getSigner()
       const _contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, _signer)
 
       setAccount(accounts[0])
@@ -174,7 +174,7 @@ export default function App() {
                   style={{ padding: '8px 18px' }}
                 >
                   {connecting
-                    ? <><div className="cc-spinner" style={{ width:16, height:16 }} />Connecting…</>
+                    ? <><div className="cc-spinner" style={{ width: 16, height: 16 }} />Connecting…</>
                     : <>🦊 Connect MetaMask</>
                   }
                 </button>
@@ -293,7 +293,6 @@ export default function App() {
       }}>
         <p>
           <strong style={{ color: 'var(--cc-text)' }}>ChainChill</strong>
-          &nbsp;·&nbsp; BE IT Mini-Project 2025–26 &nbsp;·&nbsp; Blockchain &amp; DLT Lab
           &nbsp;·&nbsp; Ethereum Sepolia Testnet
         </p>
         <p style={{ marginTop: 4 }}>
