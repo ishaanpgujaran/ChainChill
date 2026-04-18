@@ -115,13 +115,18 @@ export default function App() {
 
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div style={{
-                width: 38, height: 38,
-                background: 'linear-gradient(135deg, #4f46e5, #06b6d4)',
-                borderRadius: 10,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 20, boxShadow: '0 2px 8px rgba(79,70,229,.35)'
-              }}>❄️</div>
+              <img
+                src="/logo.png"
+                alt="ChainChill logo"
+                style={{
+                  width: 38, height: 38,
+                  borderRadius: 10,
+                  objectFit: 'contain',
+                  boxShadow: '0 2px 8px rgba(10,31,92,.2)',
+                  background: 'white',
+                  padding: 2,
+                }}
+              />
               <div>
                 <h1 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--cc-text)', lineHeight: 1.2 }}>
                   ChainChill
