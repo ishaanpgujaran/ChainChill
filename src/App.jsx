@@ -5,6 +5,10 @@ import RegisterBatch from './components/RegisterBatch'
 import LogCheckpoint from './components/LogCheckpoint'
 import VerifyBatch from './components/VerifyBatch'
 import Dashboard from './components/Dashboard'
+import {
+  LayoutDashboard, PackagePlus, Thermometer,
+  ScanSearch, Wallet, AlertTriangle, CheckCircle2, Lock
+} from 'lucide-react'
 import './index.css'
 
 // ── Sepolia chain ID ────────────────────────────────────
@@ -12,10 +16,10 @@ const SEPOLIA_CHAIN_ID = '0xaa36a7' // 11155111 in hex
 
 // ── Tab configuration ───────────────────────────────────
 const TABS = [
-  { id: 'dashboard', label: 'Dashboard', icon: '◈', needsWallet: false },
-  { id: 'register', label: 'Register Batch', icon: '⊞', needsWallet: true },
-  { id: 'log', label: 'Log Checkpoint', icon: '⊕', needsWallet: true },
-  { id: 'verify', label: 'Verify Batch', icon: '⊛', needsWallet: false },
+  { id: 'dashboard', label: 'Dashboard',      Icon: LayoutDashboard, needsWallet: false },
+  { id: 'register',  label: 'Register Batch', Icon: PackagePlus,     needsWallet: true  },
+  { id: 'log',       label: 'Log Checkpoint', Icon: Thermometer,     needsWallet: true  },
+  { id: 'verify',    label: 'Verify Batch',   Icon: ScanSearch,      needsWallet: false },
 ]
 
 function shortAddress(addr) {
@@ -147,7 +151,7 @@ export default function App() {
                   borderRadius: 8, padding: '5px 12px',
                   fontSize: '0.75rem', color: '#92400e', fontWeight: 500
                 }}>
-                  ⚠ {networkError}
+                  <AlertTriangle size={13} style={{ flexShrink:0 }} /> {networkError}
                 </div>
               )}
 
@@ -177,11 +181,11 @@ export default function App() {
                   onClick={connectWallet}
                   disabled={connecting}
                   className="cc-btn cc-btn-primary"
-                  style={{ padding: '8px 18px' }}
+                  style={{ padding: '8px 18px', gap: 6 }}
                 >
                   {connecting
                     ? <><div className="cc-spinner" style={{ width: 16, height: 16 }} />Connecting…</>
-                    : <>🦊 Connect MetaMask</>
+                    : <><Wallet size={15} />Connect MetaMask</>
                   }
                 </button>
               )}
@@ -215,14 +219,14 @@ export default function App() {
                   fontFamily: 'inherit',
                 }}
               >
-                <span style={{ fontSize: '1rem' }}>{tab.icon}</span>
+                <tab.Icon size={15} />
                 {tab.label}
                 {tab.needsWallet && !account && (
                   <span style={{
                     fontSize: '0.62rem', background: '#fef3c7',
                     color: '#d97706', borderRadius: 99, padding: '1px 6px',
-                    fontWeight: 600
-                  }}>🔒</span>
+                    fontWeight: 600, display: 'flex', alignItems: 'center', gap: 2,
+                  }}><Lock size={9} /></span>
                 )}
               </button>
             ))}
@@ -242,7 +246,7 @@ export default function App() {
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12
           }}>
             <div className="flex items-center gap-3">
-              <span style={{ fontSize: '1.5rem' }}>🦊</span>
+              <Wallet size={22} style={{ color:'#6d28d9', flexShrink:0 }} />
               <div>
                 <p style={{ fontWeight: 600, fontSize: '0.9rem', color: '#3730a3' }}>
                   Wallet connection required
@@ -266,7 +270,7 @@ export default function App() {
             marginBottom: 20, fontSize: '0.82rem', color: '#166534',
             display: 'flex', alignItems: 'center', gap: 8
           }}>
-            <span>✅</span>
+            <CheckCircle2 size={14} style={{ flexShrink:0 }} />
             <span>Batch verification is <strong>free and public</strong> — no wallet required.</span>
           </div>
         )}

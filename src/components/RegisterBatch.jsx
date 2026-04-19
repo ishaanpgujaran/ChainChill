@@ -1,5 +1,17 @@
 import { useState } from 'react'
 import { QRCodeCanvas } from 'qrcode.react'
+import { CheckCircle2, Download, ExternalLink, PackagePlus, AlertTriangle, Lock } from 'lucide-react'
+
+const TYPE_DOT_COLOR = {
+  pharma:        '#3b82f6',
+  frozen:        '#6366f1',
+  fresh:         '#22c55e',
+  quickcommerce: '#f97316',
+}
+function TypeDot({ type }) {
+  return <span style={{ display:'inline-block', width:10, height:10, borderRadius:'50%',
+    background: TYPE_DOT_COLOR[type] || '#94a3b8', flexShrink:0 }} />
+}
 
 const PRODUCT_TYPES = [
   { value: 'pharma',        label: 'Pharma / Vaccines' },
@@ -17,7 +29,6 @@ const TEMP_PRESETS = {
 
 const PRODUCT_INFO = {
   pharma: {
-    icon: '💊',
     label: 'Pharma / Vaccines',
     range: '2°C to 8°C',
     description: 'Medicines, vaccines, injections, and biological samples.',
@@ -28,7 +39,6 @@ const PRODUCT_INFO = {
     disclaimer: null,
   },
   frozen: {
-    icon: '🧊',
     label: 'Frozen Food',
     range: '−18°C to 0°C',
     description: 'Frozen meals, ice cream, meat, seafood, and frozen vegetables.',
@@ -39,7 +49,6 @@ const PRODUCT_INFO = {
     disclaimer: null,
   },
   fresh: {
-    icon: '🥛',
     label: 'Fresh / Dairy',
     range: '1°C to 8°C',
     description: 'Milk, curd, fresh vegetables, fruits, eggs, and paneer.',
@@ -50,7 +59,6 @@ const PRODUCT_INFO = {
     disclaimer: null,
   },
   quickcommerce: {
-    icon: '⚡',
     label: 'Quick Commerce',
     range: '0°C to 10°C',
     description: 'Perishable goods for sub-30-minute delivery via Blinkit, Zepto, Swiggy Instamart.',
@@ -136,7 +144,9 @@ export default function RegisterBatch({ contract, account }) {
     return (
       <div className="animate-fadeIn" style={{ maxWidth: 620, margin: '0 auto' }}>
         <div className="cc-card" style={{ padding: 36, textAlign: 'center' }}>
-          <div style={{ fontSize: 52, marginBottom: 12 }}>🎉</div>
+          <div style={{ display:'flex', justifyContent:'center', marginBottom:12 }}>
+            <CheckCircle2 size={52} style={{ color:'#16a34a' }} />
+          </div>
           <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--cc-text)', marginBottom: 6 }}>
             Batch Registered!
           </h2>
@@ -168,7 +178,7 @@ export default function RegisterBatch({ contract, account }) {
           <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, marginBottom:20 }}>
             <button onClick={downloadQR} className="cc-btn cc-btn-ghost"
               style={{ fontSize:'0.82rem', gap:6 }}>
-              ⬇ Download QR Code
+              <Download size={14} /> Download QR Code
             </button>
             <p style={{ fontSize:'0.72rem', color:'var(--cc-muted)', margin:0 }}>
               Share this QR with handlers and consumers to verify this batch
@@ -181,10 +191,10 @@ export default function RegisterBatch({ contract, account }) {
             textAlign: 'left', marginBottom: 20, fontSize: '0.84rem'
           }}>
             {[
-              ['Product',  form.productName],
-              ['Type',     (PRODUCT_INFO[form.productType]?.icon + ' ' + (PRODUCT_INFO[form.productType]?.label || form.productType))],
+              ['Product',    form.productName],
+              ['Type',       (PRODUCT_INFO[form.productType]?.label || form.productType)],
               ['Safe range', `${form.minTemp} °C to ${form.maxTemp} °C`],
-              ['Expiry',   new Date(form.expiryDate).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })],
+              ['Expiry',     new Date(form.expiryDate).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })],
             ].map(([k, v]) => (
               <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'4px 0' }}>
                 <span style={{ color: 'var(--cc-muted)', fontWeight: 500 }}>{k}</span>
@@ -202,10 +212,11 @@ export default function RegisterBatch({ contract, account }) {
                 target="_blank" rel="noopener noreferrer"
                 style={{
                   fontFamily: 'monospace', fontSize: '0.75rem',
-                  color: 'var(--cc-indigo)', wordBreak: 'break-all'
+                  color: 'var(--cc-indigo)', wordBreak: 'break-all',
+                  display: 'inline-flex', alignItems: 'center', gap: 4
                 }}
               >
-                {txHash} ↗
+                {txHash} <ExternalLink size={11} />
               </a>
             </div>
           )}
@@ -234,9 +245,11 @@ export default function RegisterBatch({ contract, account }) {
       {!account && (
         <div style={{
           background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 10,
-          padding: '12px 16px', marginBottom: 20, fontSize: '0.83rem', color: '#92400e'
+          padding: '12px 16px', marginBottom: 20, fontSize: '0.83rem', color: '#92400e',
+          display: 'flex', alignItems: 'center', gap: 8,
         }}>
-          🔒 Connect your MetaMask wallet to register batches.
+          <Lock size={14} style={{ flexShrink:0 }} />
+          Connect your MetaMask wallet to register batches.
         </div>
       )}
 
@@ -281,7 +294,7 @@ export default function RegisterBatch({ contract, account }) {
               }}>
                 {/* Header row */}
                 <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
-                  <span style={{ fontSize:'1.3rem' }}>{info.icon}</span>
+                  <TypeDot type={form.productType} />
                   <div>
                     <div style={{ fontWeight:700, fontSize:'0.88rem', color:'var(--cc-text)' }}>{info.label}</div>
                     <div style={{ fontSize:'0.75rem', color:'var(--cc-muted)', marginTop:1 }}>Safe Range: <strong style={{ color:'var(--cc-text)' }}>{info.range}</strong></div>
@@ -310,9 +323,9 @@ export default function RegisterBatch({ contract, account }) {
                   <p style={{
                     marginTop: 8, fontSize:'0.73rem', color: '#c2410c',
                     background:'#ffedd5', borderRadius:6, padding:'6px 10px',
-                    fontStyle:'italic',
+                    fontStyle:'italic', display:'flex', alignItems:'flex-start', gap:5
                   }}>
-                    ⚠ {info.disclaimer}
+                    <AlertTriangle size={12} style={{ flexShrink:0, marginTop:1 }} /> {info.disclaimer}
                   </p>
                 )}
               </div>
@@ -343,10 +356,10 @@ export default function RegisterBatch({ contract, account }) {
           {errorMsg && (
             <div style={{
               background: '#fee2e2', border: '1px solid #fecaca', borderRadius: 8,
-              padding: '10px 14px', marginBottom: 16,
-              fontSize: '0.83rem', color: '#b91c1c'
+              padding: '10px 14px', marginBottom: 16, fontSize: '0.83rem', color: '#b91c1c',
+              display: 'flex', alignItems: 'center', gap: 6,
             }}>
-              ⚠ {errorMsg}
+              <AlertTriangle size={13} style={{ flexShrink:0 }} /> {errorMsg}
             </div>
           )}
 
@@ -359,7 +372,7 @@ export default function RegisterBatch({ contract, account }) {
           >
             {status === 'loading'
               ? <><div className="cc-spinner" />Sending transaction…</>
-              : <>⊞ Register Batch on Blockchain</>
+              : <><PackagePlus size={15} />Register Batch on Blockchain</>
             }
           </button>
 
