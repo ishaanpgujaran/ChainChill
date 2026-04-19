@@ -90,10 +90,11 @@ export default function App() {
     setProvider(null)
   }
 
-  // ── Read-only contract for public verify / dashboard ───
+  // ── Read-only contract — routed through MetaMask to avoid CORS ───
   const readContract = (() => {
     try {
-      const p = new ethers.JsonRpcProvider('https://rpc.sepolia.org')
+      if (!window.ethereum) return null
+      const p = new ethers.BrowserProvider(window.ethereum)
       return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, p)
     } catch { return null }
   })()

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { QRCodeSVG } from 'qrcode.react'
+import { QRCodeCanvas } from 'qrcode.react'
 
 const PRODUCT_TYPES = [
   { value: 'pharma',        label: 'Pharma / Vaccines' },
@@ -121,6 +121,16 @@ export default function RegisterBatch({ contract, account }) {
     setStatus('idle'); setTxHash(''); setError('')
   }
 
+  function downloadQR() {
+    const canvas = document.getElementById('batch-qr-canvas')
+    if (!canvas) return
+    const url = canvas.toDataURL('image/png')
+    const link = document.createElement('a')
+    link.download = `ChainChill-QR-${form.batchId}.png`
+    link.href = url
+    link.click()
+  }
+
   // ── Success view ────────────────────────────────────────────────────────────
   if (status === 'success') {
     return (
@@ -134,14 +144,15 @@ export default function RegisterBatch({ contract, account }) {
             <strong>{form.productName}</strong> has been permanently recorded on the Ethereum Sepolia blockchain.
           </p>
 
-          {/* QR Code */}
+          {/* QR Code + Download */}
           <div style={{
             display: 'inline-flex', flexDirection: 'column', alignItems: 'center',
             background: 'white', border: '1px solid var(--cc-border)',
-            borderRadius: 12, padding: 20, marginBottom: 24,
+            borderRadius: 12, padding: 20, marginBottom: 8,
             boxShadow: 'var(--shadow-sm)'
           }}>
-            <QRCodeSVG
+            <QRCodeCanvas
+              id="batch-qr-canvas"
               value={form.batchId}
               size={160}
               bgColor="white"
@@ -150,6 +161,17 @@ export default function RegisterBatch({ contract, account }) {
             />
             <p style={{ marginTop: 10, fontSize: '0.78rem', color: 'var(--cc-muted)', fontWeight: 600 }}>
               Batch ID: <span style={{ fontFamily: 'monospace', color: 'var(--cc-indigo)' }}>{form.batchId}</span>
+            </p>
+          </div>
+
+          {/* Download button + helper */}
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, marginBottom:20 }}>
+            <button onClick={downloadQR} className="cc-btn cc-btn-ghost"
+              style={{ fontSize:'0.82rem', gap:6 }}>
+              ⬇ Download QR Code
+            </button>
+            <p style={{ fontSize:'0.72rem', color:'var(--cc-muted)', margin:0 }}>
+              Share this QR with handlers and consumers to verify this batch
             </p>
           </div>
 

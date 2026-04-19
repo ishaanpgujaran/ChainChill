@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
+import { QRCodeCanvas } from 'qrcode.react'
 import { ethers } from 'ethers'
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from '../contractConfig'
 
 function getReadContract() {
   try {
-    const p = new ethers.JsonRpcProvider('https://rpc.sepolia.org')
+    if (!window.ethereum) return null
+    const p = new ethers.BrowserProvider(window.ethereum)
     return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, p)
   } catch { return null }
 }
@@ -24,6 +26,7 @@ export default function VerifyBatch({ contract, readContract }) {
   const [checkpoints, setCheckpoints] = useState([])
   const [scanActive,  setScanActive]  = useState(false)
   const [errorMsg,    setError]       = useState('')
+  const [showQr,      setShowQr]      = useState(false)
   const scannerRef = useRef(null)
   const scanDivId  = 'cc-qr-reader'
 
@@ -186,7 +189,7 @@ export default function VerifyBatch({ contract, readContract }) {
           </div>
 
           {/* Timeline */}
-          <div className="cc-card" style={{ padding:22 }}>
+          <div className="cc-card" style={{ padding:22, marginBottom:16 }}>
             <h3 style={{ fontWeight:700, fontSize:'0.95rem', color:'var(--cc-text)', marginBottom:18 }}>
               🌡 Temperature Timeline — {checkpoints.length} checkpoint{checkpoints.length!==1?'s':''}
             </h3>
@@ -236,6 +239,47 @@ export default function VerifyBatch({ contract, readContract }) {
                     </div>
                   )
                 })}
+              </div>
+            )}
+          </div>
+
+          {/* Collapsible QR section */}
+          <div className="cc-card" style={{ padding:'14px 20px' }}>
+            <button
+              onClick={() => setShowQr(v => !v)}
+              className="cc-btn cc-btn-ghost"
+              style={{ width:'100%', justifyContent:'center', fontSize:'0.85rem' }}>
+              {showQr ? '▲ Hide QR Code' : '📱 Show QR Code for this Batch'}
+            </button>
+            {showQr && (
+              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:12, paddingTop:16 }}>
+                <QRCodeCanvas
+                  id={`verify-qr-canvas-${batchId}`}
+                  value={batchId}
+                  size={160}
+                  bgColor="white"
+                  fgColor="#0f172a"
+                  level="H"
+                />
+                <p style={{ fontSize:'0.78rem', color:'var(--cc-muted)', margin:0 }}>
+                  Batch ID: <span style={{ fontFamily:'monospace', color:'var(--cc-indigo)' }}>{batchId}</span>
+                </p>
+                <button
+                  onClick={() => {
+                    const canvas = document.getElementById(`verify-qr-canvas-${batchId}`)
+                    if (!canvas) return
+                    const link = document.createElement('a')
+                    link.download = `ChainChill-QR-${batchId}.png`
+                    link.href = canvas.toDataURL('image/png')
+                    link.click()
+                  }}
+                  className="cc-btn cc-btn-ghost"
+                  style={{ fontSize:'0.82rem', gap:6 }}>
+                  ⬇ Download QR Code
+                </button>
+                <p style={{ fontSize:'0.72rem', color:'var(--cc-muted)', margin:0 }}>
+                  Scan this QR to share batch verification
+                </p>
               </div>
             )}
           </div>
